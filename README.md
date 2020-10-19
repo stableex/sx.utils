@@ -16,7 +16,7 @@ const double amount = sx::utils::asset_to_double( quantity );
 
 - [STATIC `double_to_asset`](#static-double_to_asset)
 - [STATIC `asset_to_double`](#static-asset_to_double)
-
+- [STATIC `sort_tokens`](#static-sort_tokens)
 
 ## STATIC `double_to_asset`
 
@@ -58,4 +58,31 @@ Convert asset to double
 const asset quantity = asset{10000, symbol{"EOS", 4}};
 const double amount = sx::utils::asset_to_double( quantity );
 // => 1.0
+```
+
+
+## STATIC `sort_tokens`
+
+Returns sorted token assets, used to handle return values from pairs sorted in this order
+
+### params
+
+- `{asset} a` - token A
+- `{asset} b` - token B
+
+### returns
+
+- `{pair<asset, asset>}` - sorted tokens
+
+### example
+
+```c++
+// Inputs
+const asset a = asset{10000, symbol{"USDT", 4}};
+const asset b = asset{10000, symbol{"EOS", 4}};
+
+// Sort
+const auto[ token0, token1 ] = sx::utils::sort_tokens( a, b );
+// token0 => "1.0000 EOS"
+// token1 => "1.0000 USDT"
 ```

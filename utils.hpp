@@ -64,5 +64,39 @@ namespace utils {
     {
         return asset{ static_cast<int64_t>( amount * pow(10, sym.precision())), sym };
     }
+
+
+    /**
+     * ## STATIC `sort_tokens`
+     *
+     * Returns sorted token assets, used to handle return values from pairs sorted in this order
+     *
+     * ### params
+     *
+     * - `{asset} a` - token A
+     * - `{asset} b` - token B
+     *
+     * ### returns
+     *
+     * - `{pair<asset, asset>}` - sorted tokens
+     *
+     * ### example
+     *
+     * ```c++
+     * // Inputs
+     * const asset a = asset{10000, symbol{"USDT", 4}};
+     * const asset b = asset{10000, symbol{"EOS", 4}};
+     *
+     * // Sort
+     * const auto[ token0, token1 ] = sx::utils::sort_tokens( a, b );
+     * // token0 => "1.0000 EOS"
+     * // token1 => "1.0000 USDT"
+     * ```
+     */
+    static std::pair<asset, asset> sort_tokens( const asset a, const asset b )
+    {
+        eosio::check(a.symbol != b.symbol, "SX.Utils: IDENTICAL_ASSETS");
+        return a.symbol < b.symbol ? std::pair<asset, asset>{a, b} : std::pair<asset, asset>{b, a};
+    }
 };
 }
