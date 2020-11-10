@@ -1,6 +1,6 @@
 # **`SX Utils`**
 
-[![Build Status](https://travis-ci.org/stableex/sx.utils.svg?branch=master)](https://travis-ci.org/stableex/sx.utils)
+[![Build Status](https://travis-ci.org/stableex/sx.utils.svg?branch=main)](https://travis-ci.org/stableex/sx.utils)
 
 ## Quickstart
 
