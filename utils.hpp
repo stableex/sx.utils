@@ -10,6 +10,9 @@ namespace utils {
     using eosio::asset;
     using eosio::symbol;
 
+    using std::string;
+    using std::vector;
+
     /**
      * ## STATIC `asset_to_double`
      *
@@ -65,7 +68,6 @@ namespace utils {
         return asset{ static_cast<int64_t>( amount * pow(10, sym.precision())), sym };
     }
 
-
     /**
      * ## STATIC `sort_tokens`
      *
@@ -97,6 +99,46 @@ namespace utils {
     {
         eosio::check(a.symbol != b.symbol, "SX.Utils: IDENTICAL_ASSETS");
         return a.symbol < b.symbol ? std::pair<asset, asset>{a, b} : std::pair<asset, asset>{b, a};
+    }
+
+    /**
+     * ## STATIC `split`
+     *
+     * Split string into tokens
+     *
+     * ### params
+     *
+     * - `{string} str` - string to split
+     * - `{string} delim` - delimiter (ex: ",")
+     *
+     * ### returns
+     *
+     * - `{vector<string>}` - tokenized strings
+     *
+     * ### example
+     *
+     * ```c++
+     * const auto[ token0, token1 ] = sx::utils::split( "foo,bar", "," );
+     * // token0 => "foo"
+     * // token1 => "bar"
+     * ```
+     */
+    static vector<string> split( const string str, const string delim )
+    {
+        vector<string> tokens;
+        if ( str.size() == 0 ) return tokens;
+
+        size_t prev = 0, pos = 0;
+        do
+        {
+            pos = str.find(delim, prev);
+            if (pos == string::npos) pos = str.length();
+            string token = str.substr(prev, pos-prev);
+            if (token.length() > 0) tokens.push_back(token);
+            prev = pos + delim.length();
+        }
+        while (pos < str.length() && prev < str.length());
+        return tokens;
     }
 };
 }

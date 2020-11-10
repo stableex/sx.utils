@@ -86,3 +86,24 @@ const auto[ token0, token1 ] = sx::utils::sort_tokens( a, b );
 // token0 => "1.0000 EOS"
 // token1 => "1.0000 USDT"
 ```
+
+## STATIC `split`
+
+Split string into tokens
+
+### params
+
+- `{string} str` - string to split
+- `{string} delim` - delimiter (ex: ",")
+
+### returns
+
+- `{vector<string>}` - tokenized strings
+
+### example
+
+```c++
+const auto[ token0, token1 ] = sx::utils::split( "foo,bar", "," );
+// token0 => "foo"
+// token1 => "bar"
+```
