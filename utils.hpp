@@ -9,6 +9,10 @@ namespace utils {
 
     using eosio::asset;
     using eosio::symbol;
+    using eosio::extended_symbol;
+    using eosio::extended_asset;
+    using eosio::name;
+    using eosio::symbol_code;
 
     using std::string;
     using std::vector;
@@ -140,5 +144,209 @@ namespace utils {
         while (pos < str.length() && prev < str.length());
         return tokens;
     }
+
+
+    /**
+     * ## STATIC `parse_name`
+     *
+     * Parse string for name. Return default name if invalid. Caller can check validity with name::value.
+     *
+     * ### params
+     *
+     * - `{string} str` - string to parse
+     *
+     * ### returns
+     *
+     * - `{name}` - name
+     *
+     * ### example
+     *
+     * ```c++
+     * const name contract = sx::utils::parse_name( "tethertether" );
+     * // contract => "tethertether"_n
+     * ```
+     */
+    static name parse_name(const string& str) {
+
+        if(str.length()==0 || str.length()>13) return {};
+        int i=-1;
+        for (const auto c: str ) {
+            i++;
+            if( islower(c) || (isdigit(c) && c<='6') || c=='.') {
+                if(i==0 && !islower(c) ) return {};
+                if(i==12 && (c<'a' || c>'j')) return {};
+            }
+            else return {};
+        }
+        return name{str};
+    }
+    /**
+     * ## STATIC `parse_symbol_code`
+     *
+     * Parse string for symbol_code. Return default symbol_code if invalid. Caller can check validity with symbol_code::is_valid().
+     *
+     * ### params
+     *
+     * - `{string} str` - string to parse
+     *
+     * ### returns
+     *
+     * - `{symbol_code}` - symbol_code
+     *
+     * ### example
+     *
+     * ```c++
+     * const symbol_code symcode = sx::utils::parse_symbol_code( "USDT" );
+     * // symcode => symbol_code{"USDT"}
+     * ```
+     */
+    static symbol_code parse_symbol_code(const string& str) {
+        for (const auto c: str ) {
+            if( !isalpha(c) || islower(c)) return {};
+        }
+        auto sym_code = symbol_code{ str };
+
+        return sym_code.is_valid() ? sym_code : symbol_code{};
+    }
+
+    /**
+     * ## STATIC `parse_asset`
+     *
+     * Parse string for asset. Symbol precision is calculated based on the number of decimal digits.
+     * Return default asset if invalid. Caller can check validity with asset::is_valid().
+     *
+     * ### params
+     *
+     * - `{string} str` - string to parse
+     *
+     * ### returns
+     *
+     * - `{asset}` - asset
+     *
+     * ### example
+     *
+     * ```c++
+     * const asset out = sx::utils::parse_asset( "-1.0000 USDT" );
+     * // out => asset{-10000, symbol{"USDT",4}}
+     * ```
+     */
+    static asset parse_asset(const string& str) {
+        auto tokens = utils::split(str, " ");
+        if(tokens.size()!=2) return {};
+
+        auto sym_code = parse_symbol_code(tokens[1]);
+        if(!sym_code.is_valid()) return {};
+
+        int64_t amount = 0;
+        uint8_t precision = 0, digits=0;
+        bool seen_dot = false, neg = false;
+        for (const auto c: tokens[0] ) {
+            if(c=='-') {
+                if(digits>0) return {};
+                neg = true;
+                continue;
+            }
+            if(c=='.') {
+                if(seen_dot || digits==0) return {};
+                seen_dot = true;
+                continue;
+            }
+            if( !isdigit(c)) return {};
+            digits++;
+            if(seen_dot) precision++;
+            amount = amount*10 + (c-'0');
+        }
+        if(precision > 16 || (seen_dot && precision==0)) return {};
+
+        asset out = asset {neg ? -amount : amount, symbol{sym_code, precision}};
+        if(!out.is_valid()) return {};
+
+        return out;
+    }
+
+    /**
+     * ## STATIC `parse_extended_symbol`
+     *
+     * Parse string for extended_symbol.
+     * Return default asset if invalid. Caller can check validity with symbol::is_valid().
+     *
+     * ### params
+     *
+     * - `{string} str` - string to parse
+     *
+     * ### returns
+     *
+     * - `{extended_symbol}` - extended symbol
+     *
+     * ### example
+     *
+     * ```c++
+     * const extended_symbol ext_sym = sx::utils::parse_extended_symbol( "4,USDT@tethertether" );
+     * // ext_sym => extended_symbol{symbol{"USDT",4}, "tethertether"_n}
+     * ```
+     */
+    static extended_symbol parse_extended_symbol( const string& str)
+    {
+        auto ext_tokens = utils::split(str, "@");
+        if(ext_tokens.size()!=2) return {};
+
+        auto contract = parse_name(ext_tokens[1]);
+        if(!contract.value || !is_account(contract)) return {};
+
+        auto tokens = utils::split(ext_tokens[0], ",");
+        if(tokens.size()!=2) return {};
+
+        int precision = 0;
+        for(const auto c: tokens[0]){
+            if(!isdigit(c)) return {};
+            precision = precision*10 + (c-'0');
+        }
+        if(precision < 0 || precision > 16) return {};
+
+        auto symcode = parse_symbol_code(tokens[1]);
+        if(!symcode.is_valid()) return {};
+
+        symbol sym = symbol{symcode, static_cast<uint8_t>(precision)};
+
+        return extended_symbol {sym, contract};
+    }
+
+    /**
+     * ## STATIC `parse_extended_asset`
+     *
+     * Parse string for extended_asset. Symbol precision is calculated based on the number of decimal digits.
+     * Return default asset if invalid. Caller can check validity with quantity::is_valid().
+     *
+     * ### params
+     *
+     * - `{string} str` - string to parse
+     *
+     * ### returns
+     *
+     * - `{extended_asset}` - extended asset
+     *
+     * ### example
+     *
+     * ```c++
+     * const extended_asset ext_out = sx::utils::parse_extended_asset( "-1.0000 USDT@tethertether" );
+     * // ext_sym => extended_symbol{asset{-10000, symbol{"USDT",4}}, "tethertether"_n}
+     * ```
+     */
+    static extended_asset parse_extended_asset( const string& str)
+    {
+        auto ext_tokens = utils::split(str, "@");
+
+        if(ext_tokens.size()!=2 || ext_tokens[1].length()==0 || ext_tokens[1].length()>13)
+            return {};
+
+        auto contract = parse_name(ext_tokens[1]);
+        if(!contract.value || !is_account(contract)) return {};
+
+        asset quantity = parse_asset(ext_tokens[0]);
+        if(!quantity.is_valid()) return {};
+
+        return extended_asset {quantity, contract};
+    }
+
 };
 }
