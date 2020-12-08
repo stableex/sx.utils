@@ -210,6 +210,46 @@ namespace utils {
     }
 
     /**
+     * ## STATIC `parse_symbol`
+     *
+     * Parse string for symbol. Return default symbol if invalid. Caller can check validity with symbol::is_valid().
+     *
+     * ### params
+     *
+     * - `{string} str` - string to parse
+     *
+     * ### returns
+     *
+     * - `{symbol}` - symbol
+     *
+     * ### example
+     *
+     * ```c++
+     * const symbol sym = sx::utils::parse_symbol( "4,USDT" );
+     * // sym => symbol{"USDT",4}
+     * ```
+     */
+    static symbol parse_symbol(const string& str) {
+
+        auto tokens = utils::split(str, ",");
+        if(tokens.size()!=2) return {};
+
+        int precision = 0;
+        for(const auto c: tokens[0]){
+            if(!isdigit(c)) return {};
+            precision = precision*10 + (c-'0');
+        }
+        if(precision < 0 || precision > 16) return {};
+
+        auto symcode = parse_symbol_code(tokens[1]);
+        if(!symcode.is_valid()) return {};
+
+        symbol sym = symbol{symcode, static_cast<uint8_t>(precision)};
+
+        return sym.is_valid() ? sym : symbol{};
+    }
+
+    /**
      * ## STATIC `parse_asset`
      *
      * Parse string for asset. Symbol precision is calculated based on the number of decimal digits.
@@ -293,20 +333,7 @@ namespace utils {
         auto contract = parse_name(ext_tokens[1]);
         if(!contract.value || !is_account(contract)) return {};
 
-        auto tokens = utils::split(ext_tokens[0], ",");
-        if(tokens.size()!=2) return {};
-
-        int precision = 0;
-        for(const auto c: tokens[0]){
-            if(!isdigit(c)) return {};
-            precision = precision*10 + (c-'0');
-        }
-        if(precision < 0 || precision > 16) return {};
-
-        auto symcode = parse_symbol_code(tokens[1]);
-        if(!symcode.is_valid()) return {};
-
-        symbol sym = symbol{symcode, static_cast<uint8_t>(precision)};
+        auto sym = parse_symbol(ext_tokens[0]);
 
         return extended_symbol {sym, contract};
     }
