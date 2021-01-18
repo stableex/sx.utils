@@ -5,7 +5,7 @@
 ## Quickstart
 
 ```c++
-#include <sx.utils/utils.hpp"
+#include <sx.utils/utils.hpp>
 
 const asset quantity = asset{10000, symbol{"EOS", 4}};
 const double amount = sx::utils::asset_to_double( quantity );
