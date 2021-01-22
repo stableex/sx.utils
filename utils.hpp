@@ -204,7 +204,7 @@ namespace utils {
         for (const auto c: str ) {
             if( !isalpha(c) || islower(c)) return {};
         }
-        auto sym_code = symbol_code{ str };
+        const symbol_code sym_code = symbol_code{ str };
 
         return sym_code.is_valid() ? sym_code : symbol_code{};
     }
@@ -232,19 +232,19 @@ namespace utils {
     static symbol parse_symbol(const string& str) {
 
         auto tokens = utils::split(str, ",");
-        if(tokens.size()!=2) return {};
+        if (tokens.size()!=2) return {};
 
         int precision = 0;
-        for(const auto c: tokens[0]){
+        for (const auto c: tokens[0]){
             if(!isdigit(c)) return {};
             precision = precision*10 + (c-'0');
         }
-        if(precision < 0 || precision > 16) return {};
+        if (precision < 0 || precision > 16) return {};
 
-        auto symcode = parse_symbol_code(tokens[1]);
+        const symbol_code symcode = parse_symbol_code(tokens[1]);
         if(!symcode.is_valid()) return {};
 
-        symbol sym = symbol{symcode, static_cast<uint8_t>(precision)};
+        const symbol sym = symbol{symcode, static_cast<uint8_t>(precision)};
 
         return sym.is_valid() ? sym : symbol{};
     }
@@ -328,12 +328,10 @@ namespace utils {
     static extended_symbol parse_extended_symbol( const string& str)
     {
         auto ext_tokens = utils::split(str, "@");
-        if(ext_tokens.size()!=2) return {};
+        if ( ext_tokens.size() != 2 ) return {};
 
-        auto contract = parse_name(ext_tokens[1]);
-        if(!contract.value || !is_account(contract)) return {};
-
-        auto sym = parse_symbol(ext_tokens[0]);
+        const name contract = parse_name(ext_tokens[1]);
+        const symbol sym = parse_symbol(ext_tokens[0]);
 
         return extended_symbol {sym, contract};
     }
@@ -363,17 +361,14 @@ namespace utils {
     {
         auto ext_tokens = utils::split(str, "@");
 
-        if(ext_tokens.size()!=2 || ext_tokens[1].length()==0 || ext_tokens[1].length()>13)
+        if (ext_tokens.size()!=2 || ext_tokens[1].length()==0 || ext_tokens[1].length()>13)
             return {};
 
-        auto contract = parse_name(ext_tokens[1]);
-        if(!contract.value || !is_account(contract)) return {};
-
-        asset quantity = parse_asset(ext_tokens[0]);
+        const name contract = parse_name(ext_tokens[1]);
+        const asset quantity = parse_asset(ext_tokens[0]);
         if(!quantity.is_valid()) return {};
 
         return extended_asset {quantity, contract};
     }
-
 };
 }
