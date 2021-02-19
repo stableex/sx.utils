@@ -1,7 +1,7 @@
 #pragma once
 
 #include <eosio/asset.hpp>
-
+#include <eosio/eosio.hpp>
 #include <math.h>
 
 namespace sx {
@@ -370,5 +370,23 @@ namespace utils {
 
         return extended_asset {quantity, contract};
     }
+
+    static extended_asset get_balance( const extended_symbol ext_sym, const name owner )
+    {
+        //eosio.token accounts table - private in eosio.token contract
+        struct [[eosio::table]] account {
+            asset    balance;
+            uint64_t primary_key()const { return balance.symbol.code().raw(); }
+        };
+        typedef eosio::multi_index< "accounts"_n, account > accounts_table;
+
+        accounts_table _accounts( ext_sym.get_contract(), owner.value );
+        auto it = _accounts.find( ext_sym.get_symbol().code().raw() );
+        if(it == _accounts.end()) return { 0, ext_sym };
+        eosio::check( ext_sym.get_symbol() == it->balance.symbol, "SX.Utils: extended symbol mismatch balance");
+
+        return { it->balance.amount, ext_sym };
+    }
+
 };
 }
