@@ -149,7 +149,7 @@ namespace utils {
     /**
      * ## STATIC `parse_name`
      *
-     * Parse string for name. Return default name if invalid. Caller can check validity with name::value.
+     * Parse string for account name. Return default name if invalid. Caller can check validity with name::value.
      *
      * ### params
      *
@@ -168,15 +168,15 @@ namespace utils {
      */
     static name parse_name(const string& str) {
 
-        if(str.length()==0 || str.length()>13) return {};
-        int i=-1;
-        for (const auto c: str ) {
-            i++;
-            if( islower(c) || (isdigit(c) && c<='6') || c=='.') {
-                if(i==0 && !islower(c) ) return {};
-                if(i==12 && (c<'a' || c>'j')) return {};
+        if(str.length() == 0 || str.length() > 12) return {};
+        int i=0;
+        for(const auto c: str) {
+            if((c >= 'a' && c <= 'z') || ( c >= '0' && c <= '5') || c == '.') {
+                if(i == 0 && ( c >= '0' && c <= '5') ) return {};   //can't start with a digit
+                if(i == 11 && c == '.') return {};                  //can't end with a .
             }
             else return {};
+            i++;
         }
         return name{str};
     }
