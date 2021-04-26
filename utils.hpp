@@ -201,8 +201,9 @@ namespace utils {
      * ```
      */
     static symbol_code parse_symbol_code(const string& str) {
+        if(str.size() > 7) return {};
         for (const auto c: str ) {
-            if( !isalpha(c) || islower(c)) return {};
+            if( c < 'A' || c > 'Z') return {};
         }
         const symbol_code sym_code = symbol_code{ str };
 
@@ -236,17 +237,15 @@ namespace utils {
 
         int precision = 0;
         for (const auto c: tokens[0]){
-            if(!isdigit(c)) return {};
-            precision = precision*10 + (c-'0');
+            if(c < '0' || c > '9') return {};
+            precision = precision * 10 + (c-'0');
         }
         if (precision < 0 || precision > 16) return {};
 
         const symbol_code symcode = parse_symbol_code(tokens[1]);
         if(!symcode.is_valid()) return {};
 
-        const symbol sym = symbol{symcode, static_cast<uint8_t>(precision)};
-
-        return sym.is_valid() ? sym : symbol{};
+        return symbol{symcode, static_cast<uint8_t>(precision)};
     }
 
     /**
@@ -291,17 +290,16 @@ namespace utils {
                 seen_dot = true;
                 continue;
             }
-            if( !isdigit(c)) return {};
+            if( c < '0' || c > '9') return {};
             digits++;
             if(seen_dot) precision++;
-            amount = amount*10 + (c-'0');
+            amount = amount * 10 + (c-'0');
         }
         if(precision > 16 || (seen_dot && precision==0)) return {};
 
         asset out = asset {neg ? -amount : amount, symbol{sym_code, precision}};
-        if(!out.is_valid()) return {};
 
-        return out;
+        return out.is_valid() ? out : asset {};
     }
 
     /**
