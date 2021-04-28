@@ -107,3 +107,24 @@ const auto[ token0, token1 ] = sx::utils::split( "foo,bar", "," );
 // token0 => "foo"
 // token1 => "bar"
 ```
+
+
+## STATIC `parse_name`
+
+Parse string for account name without failing
+
+### params
+
+- `{string} str` - string to split
+
+### returns
+
+- `{name}` - converted name, `""_n` if invalid
+
+### example
+
+```c++
+const auto contract = sx::utils::parse_name( "test.sx" );
+eosio::check(contract.is_valid(), "Invalid contract name");
+// => "test_sx"_n
+```
