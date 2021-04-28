@@ -369,6 +369,30 @@ namespace utils {
         return extended_asset {quantity, contract};
     }
 
+    /**
+     * ## STATIC `get_balance`
+     *
+     * Get account balance without failing to avoid assert errors for accounts with unopened balance.
+     * eosio.token::get_balance alternative
+     *
+     * ### params
+     *
+     * - `{extended_symbol} ext_sym` - extended symbol to query
+     * - `{name} owner` - account to query balance for
+     *
+     * ### returns
+     *
+     * - `{extended_asset}` - account balance, `extended_asset{}` if no opened account
+     *
+     * ### example
+     *
+     * ```c++
+     * const extended_symbol ext_sym { symbol{"USDT", 4}, "tethertether"_n };
+     * const auto balance = sx::utils::get_balance(ext_sym).quantity;
+     * eosio::check(balance.is_valid(), "Balance not opened");
+
+     * ```
+     */
     static extended_asset get_balance( const extended_symbol ext_sym, const name owner )
     {
         //eosio.token accounts table - private in eosio.token contract
@@ -386,7 +410,30 @@ namespace utils {
         return { it->balance.amount, ext_sym };
     }
 
-    static asset get_supply( const extended_symbol ext_sym) {
+    /**
+     * ## STATIC `get_supply`
+     *
+     * Get token supply without failing to avoid assert errors for non-existing tokens.
+     * eosio.token::get_supply alternative
+     *
+     * ### params
+     *
+     * - `{extended_symbol} ext_sym` - extended symbol to query
+     *
+     * ### returns
+     *
+     * - `{asset}` - token supply, `asset{}` if token doesn't exist
+     *
+     * ### example
+     *
+     * ```c++
+     * const extended_symbol ext_sym { symbol{"USDT", 4}, "tethertether"_n };
+     * const auto supply = sx::utils::get_supply(ext_sym);
+     * eosio::check(balance.is_valid(), "Token doesn't exist on this contract");
+     * ```
+     */
+    static asset get_supply( const extended_symbol ext_sym)
+    {
         struct [[eosio::table]] currency_stats {
             asset    supply;
             asset    max_supply;
