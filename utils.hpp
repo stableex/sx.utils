@@ -386,5 +386,21 @@ namespace utils {
         return { it->balance.amount, ext_sym };
     }
 
+    static asset get_supply( const extended_symbol ext_sym) {
+        struct [[eosio::table]] currency_stats {
+            asset    supply;
+            asset    max_supply;
+            name     issuer;
+
+            uint64_t primary_key()const { return supply.symbol.code().raw(); }
+        };
+        typedef eosio::multi_index< "stat"_n, currency_stats > stats;
+
+        stats _stat(ext_sym.get_contract(), ext_sym.get_symbol().code().raw() );
+        const auto it = _stat.begin();
+
+        return it != _stat.end() ? it->supply : asset {};
+    }
+
 };
 }
