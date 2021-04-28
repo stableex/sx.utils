@@ -256,6 +256,7 @@ eosio::check(ext_quantity.quantity.is_valid(), "Invalid extended asset");
 ## STATIC `get_balance`
 
 Get account balance without failing to avoid assert errors for accounts with unopened balance 
+
 `eosio.token::get_balance` alternative
 
 ### params
@@ -278,6 +279,7 @@ eosio::check(balance.is_valid(), "Balance not opened");
 ## STATIC `get_supply`
 
 Get token supply without failing to avoid assert errors for non-existing tokens
+
 `eosio.token::get_supply` alternative
 
 ### params
