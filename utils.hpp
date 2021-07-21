@@ -17,6 +17,13 @@ namespace utils {
     using std::string;
     using std::vector;
 
+    struct OraclizedAsset {
+        extended_asset tokens;
+        double value;
+        double ratioed;
+    };
+
+
     /**
      * ## STATIC `asset_to_double`
      *
