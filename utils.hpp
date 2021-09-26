@@ -2,6 +2,7 @@
 
 #include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
+#include <eosio/crypto.hpp>
 #include <math.h>
 
 namespace sx {
@@ -454,6 +455,15 @@ namespace utils {
         const auto it = _stat.begin();
 
         return it != _stat.end() ? it->supply : asset {};
+    }
+
+
+    static uint64_t get_random( uint64_t nonce ){
+
+        const auto sha = eosio::sha256( (const char*) &nonce, sizeof( nonce )); // generate hash for uniform distribution
+        const uint64_t rnd = *((uint64_t *) &sha );             // take 8 first bytes
+
+        return rnd;
     }
 
 };
