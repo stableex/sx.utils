@@ -457,8 +457,26 @@ namespace utils {
         return it != _stat.end() ? it->supply : asset {};
     }
 
-
-    static uint64_t get_random( uint64_t nonce ){
+    /**
+     * ## STATIC `get_hashed_nonce`
+     *
+     * Basic get hashed nonce
+     *
+     * ### params
+     *
+     * - `{uint64_t} nonce` - nonce
+     *
+     * ### returns
+     *
+     * - `{uint64_t}` - hashed nonce number
+     *
+     * ### example
+     *
+     * ```c++
+     * const auto rnd = sx::utils::get_hashed_nonce(12345);
+     * ```
+     */
+    static uint64_t get_hashed_nonce( uint64_t nonce ){
 
         const auto sha = eosio::sha256( (const char*) &nonce, sizeof( nonce )); // generate hash for uniform distribution
         const uint64_t rnd = *((uint64_t *) &sha );             // take 8 first bytes
